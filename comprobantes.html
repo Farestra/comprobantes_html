@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comprovantes Original y Copia en A5</title>
+
+    <!--Todo en uno, CSS, HTML y JS-->
+    <style>
+      @page {
+        margin: 0;
+      }
+      body {
+        margin: 0;
+      }
+      .sheet {
+        margin: 0;
+        /**overflow: hidden;**/
+        position: relative;
+        box-sizing: border-box;
+        page-break-after: always;
+      }
+
+      /** Tamaños de papel **/
+      body.A4 .sheet {
+        width: 210mm;
+        height: 296mm;
+      }
+      body.A4.landscape .sheet {
+        width: 297mm;
+        height: 209mm;
+      }
+      body.A5 .sheet {
+        width: 148mm;
+        height: 209mm;
+      }
+      body.A5.landscape .sheet {
+        width: 210mm;
+        height: 147mm;
+      }
+      body.A5.landscape .sheet {
+        width: 210mm;
+        height: 147mm;
+      }
+
+      /** Padding area **/
+      .sheet.padding-5mm {
+        padding: 5mm;
+      }
+      .sheet.padding-10mm {
+        padding: 10mm;
+      }
+      .sheet.padding-15mm {
+        padding: 15mm;
+      }
+      .sheet.padding-20mm {
+        padding: 20mm;
+      }
+      .sheet.padding-25mm {
+        padding: 25mm;
+      }
+
+      /** Para la vista previa **/
+      @media screen {
+        body {
+          background: #e0e0e0;
+        }
+        .sheet {
+          background: white;
+          box-shadow: 0 0.5mm 2mm rgba(0, 0, 0, 0.3);
+          margin: 5mm;
+        }
+      }
+
+      /** Fix para Chrome **/
+      @media print {
+        body.A3.landscape {
+          width: 420mm;
+        }
+        body.A3,
+        body.A4.landscape {
+          width: 297mm;
+        }
+        body.A4,
+        body.A5.landscape {
+          width: 210mm;
+        }
+        body.A5 {
+          width: 148mm;
+          height: 209mm;
+        }
+        /** para ocultar los elementos no imprimibles asignares la class="no-print" **/
+        .no-print,
+        .no-print * {
+          display: none !important;
+        }
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .encabezado {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        margin: 0;
+        border: 1px solid black;
+      }
+
+      .encabezado p {
+        padding: 0;
+        margin: 1px 1px 1px 1px;
+        font-size: 0.6em;
+      }
+
+      .cliente,
+      .equipo {
+        display: grid;
+        grid-template-areas:
+          "arr arr"
+          "izq der"
+          "izq der"
+          "aba aba";
+        grid-template-rows: auto auto auto;
+        grid-template-columns: auto auto;
+        border: 1px solid black;
+        padding: 5px;
+        font-size: 0.75em;
+      }
+
+      .clinete,
+      .equipo p {
+        padding: 0;
+        margin: 1px 1px 1px 1px;
+      }
+
+      .arriba {
+        grid-area: arr;
+        text-align: center;
+      }
+
+      .izquierda {
+        grid-area: izq;
+      }
+
+      .derecha {
+        grid-area: der;
+      }
+
+      .abajo {
+        grid-area: aba;
+      }
+
+      label,
+      .label {
+        display: inline-block;
+        margin: 1px 1px 1px 1px;
+      }
+
+      .item {
+        display: flex;
+      }
+
+      input {
+        flex: 1;
+        margin: 1px 1px 1px 1px;
+        font-size: 0.75em;
+      }
+
+      button {
+        font-size: 0.75em;
+      }
+
+      .pie {
+        display: grid;
+        grid-template-areas:
+          "parr parr parr parr"
+          "abi abi md md"
+          "abi abi abd abd"
+          "ab ab ab ab";
+        grid-template-rows: auto auto auto auto;
+        grid-template-columns: 25% 25% 25% 25%;
+        border: 1px solid black;
+        padding: 5px;
+        font-size: 0.75em;
+      }
+
+      .pie p {
+        padding: 0;
+        margin: 1px 1px 1px 1px;
+      }
+
+      .piearriba {
+        grid-area: parr;
+      }
+
+      .disclaimer {
+        grid-area: abi;
+      }
+      .disclaimer p {
+        font-size: 0.7em;
+        text-align: justify;
+        padding: 3px 3px 3px 3px;
+      }
+
+      .montos {
+        grid-area: md;
+      }
+
+      .firmas {
+        grid-area: abd;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 0;
+        margin: 0;
+      }
+
+      .piea {
+        grid-area: ab;
+        display: flex;
+        justify-content: space-evenly;
+      }
+
+      textarea {
+        resize: none;
+        overflow: hidden;
+      }
+
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        display: none;
+      }
+      .copia {
+        margin-top: 10px;
+      }
+    </style>
+
+    <!--<body class="A5 landscape"> para A5 landscape -->
+    <style>
+      @page {
+        size: A5;
+      }
+    </style>
+
+    <style>
+      .hide-on-screen {
+        display: none;
+      }
+
+      @media print {
+        .hide-on-screen {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <!--Cuerpo de tamaño A5-->
+  <body class="A5">
+    <!--Hoja de 1/2 A5 para cargar solo el original, por eso style height = 105mm-->
+    <section class="sheet padding-5mm" style="height: 105mm">
+      <div class="original">
+        <div class="encabezado" style="text-align: start">
+          <div class="logo">
+            <svg
+              id="logo"
+              width="100"
+              height="40"
+              viewBox="0 0 156 91"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <!--Acá va tu logo, preferiblemente en svg-->
+            </svg>
+          </div>
+          <div class="direccion" style="text-align: center">
+            <p>Tu dirección</p>
+            <p>Tu pueblo</p>
+            <p>Tu provincia - Argentina</p>
+          </div>
+          <div class="comprobante" style="text-align: end">
+            <p>Órden de reparación n°: <span id="otnro"></span></p>
+            <p>Documento NO vlálido como Factura</p>
+            <p>Fecha: <span id="fecha"></span></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="formulario">
+            <div class="cliente">
+              <div class="arriba">DATOS DEL CLIENTE</div>
+              <div class="izquierda">
+                <div class="item">
+                  <label for="nombre">Nombre: </label>
+                  <input type="text" id="inp_1" required />
+                </div>
+                <div class="item">
+                  <label for="apellido">Apellido: </label>
+                  <input type="text" id="inp_2" required />
+                </div>
+                <div class="item">
+                  <label for="dni">DNI: </label>
+                  <input type="number" id="inp_3" required />
+                </div>
+              </div>
+              <div class="derecha">
+                <div class="item">
+                  <label for="telefono1">Teléfono 1: </label>
+                  <input type="tel" id="inp_4" />
+                </div>
+                <div class="item">
+                  <label for="telefono2">Teléfono 2: </label>
+                  <input type="tel" id="inp_5" />
+                </div>
+                <div class="item">
+                  <label for="email">E-mail: </label>
+                  <input type="email" id="inp_6" />
+                </div>
+              </div>
+            </div>
+
+            <div class="equipo">
+              <div class="arriba">DATOS DEL EQUIPO</div>
+              <div class="izquierda">
+                <div class="item">
+                  <label for="marca">Marca: </label>
+                  <input type="text" id="inp_7" />
+                </div>
+                <div class="item">
+                  <label for="modelo">Modelo: </label>
+                  <input type="text" id="inp_8" />
+                </div>
+              </div>
+              <div class="derecha">
+                <div class="item">
+                  <label for="imei">IMEI: </label>
+                  <input type="text" id="inp_9" />
+                </div>
+                <div class="item">
+                  <label for="serial">SERIAL: </label>
+                  <input type="text" id="inp_10" />
+                </div>
+              </div>
+              <div class="abajo">
+                <div class="item">
+                  <label for="estado">Estado: </label>
+                  <input type="text" id="inp_11" />
+                </div>
+                <div class="item">
+                  <label for="reaparar">Reparación Solicitada: </label>
+                  <input type="text" id="inp_12" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pie">
+              <div class="piearriba" style="text-align: center">
+                REPORTE DEL SERVICIO TÉCNICO
+              </div>
+              <div class="disclaimer">
+                <p>
+                  IMPORTANTE: Para retirar el equipo deberá presentar este
+                  comprobante, si el mismo fuera extraviado deberá presentarse
+                  la documentación pertinente que avale su pertenencia. Si el
+                  equipo no fuera retirado en el plazo de sesenta (60) días a
+                  partir de su fecha de recepción será considerado abandonado
+                  quedando Mega Celulares facultado a darle el destino que
+                  considere pertinente sin necesidad de informarlo previamente
+                  al cliente. Los equipos mojados y/o expuestos a temperaturas
+                  extremas no tienen garantía.
+                </p>
+              </div>
+              <div class="montos">
+                <div class="item">
+                  <label for="garantia">Garantía: </label>
+                  <input type="text" id="inp_13" />
+                </div>
+                <div class="item">
+                  <label for="monto">Monto: $ </label>
+                  <input type="number" id="inp_14" />
+                </div>
+                <div class="item">
+                  <label for="sena">Seña: $ </label>
+                  <input type="number" id="inp_15" />
+                </div>
+              </div>
+              <div class="firmas">
+                <div>Firma del Cliente</div>
+                <div>Tu negocio</div>
+              </div>
+              <div class="piea">
+                <p style="font-size: 0.6em">Original para el taller</p>
+                <button type="reset" value="Limpiar" class="no-print">
+                  Borrar
+                </button>
+                <button
+                  type="button"
+                  ,
+                  value="Guardar"
+                  onclick="guardaEimprime();"
+                  class="no-print"
+                >
+                  Imprimir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+
+      <!--Copia, oculta en la edición, solo visible en la impresión-->
+      <div class="hide-on-screen" style="margin-top: 40px">
+        <div class="encabezado" style="text-align: start">
+          <div class="logo">
+            <svg
+              id="logo"
+              width="100"
+              height="40"
+              viewBox="0 0 156 91"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <!--Acá va tu logo, preferiblemente en svg-->
+            </svg>
+          </div>
+          <div class="direccion" style="text-align: center">
+            <p>Tu dirección</p>
+            <p>Tu pueblo</p>
+            <p>Tu provincia - Argentina</p>
+          </div>
+          <div class="comprobante" style="text-align: end">
+            <p>Órden de reparación n°: <span id="potnro"></span></p>
+            <p>Documento NO vlálido como Factura</p>
+            <p>Fecha: <span id="pfecha"></span></p>
+          </div>
+        </div>
+
+        <div>
+          <div>
+            <div class="equipo">
+              <div class="arriba">DATOS DEL CLIENTE</div>
+              <div class="izquierda">
+                <div class="item">
+                  <p class="label">Nombre:</p>
+                  <p id="lbl_1"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Apellido:</p>
+                  <p id="lbl_2"></p>
+                </div>
+                <div class="item">
+                  <p class="label">DNI:</p>
+                  <p id="lbl_3"></p>
+                </div>
+              </div>
+              <div class="derecha">
+                <div class="item">
+                  <p class="label">Teléfono 1:</p>
+                  <p id="lbl_4"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Teléfono 2:</p>
+                  <p id="lbl_5"></p>
+                </div>
+                <div class="item">
+                  <p class="label">E-mail:</p>
+                  <p id="lbl_6"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="equipo">
+              <div class="arriba">DATOS DEL EQUIPO</div>
+              <div class="izquierda">
+                <div class="item">
+                  <p class="label">Marca:</p>
+                  <p id="lbl_7"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Modelo:</p>
+                  <p id="lbl_8"></p>
+                </div>
+              </div>
+              <div class="derecha">
+                <div class="item">
+                  <p class="label">IMEI:</p>
+                  <p id="lbl_9"></p>
+                </div>
+                <div class="item">
+                  <p class="label">SERIAL:</p>
+                  <p id="lbl_10"></p>
+                </div>
+              </div>
+              <div class="abajo">
+                <div class="item">
+                  <p class="label">Estado:</p>
+                  <p id="lbl_11"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Reparación Solicitada:</p>
+                  <p id="lbl_12"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="pie">
+              <div class="piearriba" style="text-align: center">
+                REPORTE DEL SERVICIO TÉCNICO
+              </div>
+              <div class="disclaimer">
+                <p>
+                  IMPORTANTE: Para retirar el equipo deberá presentar este
+                  comprobante, si el mismo fuera extraviado deberá presentarse
+                  la documentación pertinente que avale su pertenencia. Si el
+                  equipo no fuera retirado en el plazo de sesenta (60) días a
+                  partir de su fecha de recepción será considerado abandonado
+                  quedando Mega Celulares facultado a darle el destino que
+                  considere pertinente sin necesidad de informarlo previamente
+                  al cliente. Los equipos mojados y/o expuestos a temperaturas
+                  extremas no tienen garantía.
+                </p>
+              </div>
+              <div class="montos">
+                <div class="item">
+                  <p class="label">Garantía:</p>
+                  <p id="lbl_13"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Monto: $</p>
+                  <p id="lbl_14"></p>
+                </div>
+                <div class="item">
+                  <p class="label">Seña: $</p>
+                  <p id="lbl_15"></p>
+                </div>
+              </div>
+              <div class="firmas">
+                <div>Firma del Cliente</div>
+                <div>Tu negocio</div>
+              </div>
+              <div class="piea">
+                <p style="font-size: 0.6em">Copia para el cliente</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script>
+      var dt = new Date();
+      var compnro =
+        dt.getFullYear() -
+        2000 +
+        "" +
+        (dt.getMonth() + 1) +
+        "" +
+        dt.getDate() +
+        "" +
+        dt.getSeconds();
+      var compfecha =
+        dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+      document.getElementById("fecha").innerHTML = compfecha;
+      document.getElementById("otnro").innerHTML = compnro;
+      document.getElementById("pfecha").innerHTML = compfecha;
+      document.getElementById("potnro").innerHTML = compnro;
+      
+
+      function guardaEimprime() {
+        //console.log("copiando los campos del original a la copia")
+
+        //en total son 15 inputs, los recorremos secuncialmente almacenando los valores en una variable
+        for (let i = 1; i < 16; i++) {
+          var valor = document.getElementById("inp_" + i).value;
+          //copiamos el valor de cada input al parágrafo correspondiente en la copia
+          document.getElementById("lbl_" + i).innerHTML = valor;
+          
+        }
+        
+        //mandalo a imprimir en A5, en tu impresora.
+        window.print();
+      }
+    </script>
+  </body>
+</html>
